@@ -2,6 +2,19 @@ import React from "react";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import './BalaDesbApp.css';
+
+const style = {
+  ContenedorStyle : {
+    display       : "flex", 
+    alignItems    : "center", 
+    flexDirection : "column", 
+    justifyContent: "center"
+  },
+  ButtonStyle: {
+    marginBottom: "1rem"
+  }
+}
+
 class BalaDesbApp extends React.Component {
   constructor(props) {
     super(props);
@@ -104,24 +117,27 @@ class BalaDesbApp extends React.Component {
 
     return (
       <div className="App">
-        <header className="App-header">
-          <div style={{display: "flex", alignItems: "center"}}>
-            <Button style={{marginRight: "1rem"}} variant="contained" onClick={this.verificar}>VERIFICAR</Button>
-            <TextField className="textFieldStyle" value={texto} onChange={this.handleChange} id="texto" label="Cadena String" variant="filled" />
+        <div className="App-header">
+          <h1>CHECKEA LOS PARÉNTESIS</h1>
+          <div>
+            <div style={style.ContenedorStyle}>
+              <Button style={style.ButtonStyle} variant="contained" onClick={this.verificar}>VERIFICAR</Button>
+              <TextField placeholder="Ingrese texto..." className="textFieldStyle" value={texto} onChange={this.handleChange} id="texto" label="Cadena String" variant="filled" />
+            </div>
+            {
+              mostrar ? (
+                <h2 style={{color: balanceado ? "#1cf138" : "#f11c1c"}}>
+                  {balanceado ? "TEXTO BALANCEADO" : "TEXTO DESBALANCEADO"}
+                </h2>   
+              ) : (
+                <h2>
+                  ESPERANDO INGRESO...
+                </h2>  
+              )
+            }
           </div>
-          {
-            mostrar ? (
-              <h1>
-                {balanceado ? "TEXTO BALANCEADO" : "TEXTO DESBALANCEADO"}
-              </h1>   
-            ) : (
-              <h1>
-                ESPERANDO INGRESO...
-              </h1>  
-            )
-          }
 
-        </header>
+        </div>
       </div>
     );
   }
