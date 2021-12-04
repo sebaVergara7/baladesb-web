@@ -22,49 +22,6 @@ class BalaDesbApp extends React.Component {
       texto : "", 
       mostrar: false, 
       balanceado: false,
-      // listaBalance: [
-      // // ---------- DATOS ORIGINALES
-      //   "hola", //B
-      //   "(hola)", //B
-      //   "(()", //D
-      //   "(:)", //B
-      //   "no voy (:()",//B
-      //   "hoy pm: fiesta :):)",//B
-      //   ":((",//D
-      //   "a (b (c (d) c) b) a :)",//B
-      // // ---------- DATOS EXTRA
-      //   ")",
-      //   "(",
-      //   "()AS(:)",
-      //   "(::))",
-      //   "(hoy pm: fiesta :):)",
-      //   "((hoy pm: fiesta :):)",
-      //   ":(():)",
-      //   ":()",
-      //   "(abc:)(abc)",
-      //   "(abc)(abc)",
-      //   "(abc:)",
-      //   ":)",
-      //   ":(",
-      //   ")(",
-      //   ":)()",
-      //   "():(",
-      //   "():(:)",
-      //   "():(:(",
-      //   "()()()()()()()",
-      //   "()()()())))((((",
-      //   ")(())(:()",
-      //   ":::))()()(::()",
-      //   ":)(())(:()",
-      //   ":)(())(:))",
-      //   ":)(())(:)))",
-      //   ":)(())(:):))",
-      //   "(::()",
-      //   "(:()",
-      //   "():)",
-      //   ":)(:):)",
-      //   "(:))"
-      // ],
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -78,132 +35,62 @@ class BalaDesbApp extends React.Component {
   verificar() {
     const {texto} = this.state;
 
-    this.setState({mostrar: true, balanceado: this.validarBalanceV5(texto)});
+    this.setState({mostrar: true, balanceado: this.validarBalanceV6(texto)});
     
     // // LISTADO DE PRUEBA
-    // const {listaBalance} = this.state;
-    // let listadoBalanceRnd = this.generadorListado();
-    // console.log("----------------------V5----------------------");
+    // console.log("----------------------V6----------------------");
     // let balanceado = null;
-    // listaBalance.forEach(element => {
-    //   balanceado = this.validarBalanceV5(element);
+    // this.generadorListado().forEach(element => {
+    //   balanceado = this.validarBalanceV6(element);
     //   if (balanceado) console.log(`${element} | Balanceado`);
     //   else console.log(`${element} | Desbalanceado`);
     // });
   }
 
-  validarBalanceV5(texto){
+  validarBalanceV6(texto){
     let lista_texto = texto.split("");
     
-    let { lista_par_izq, lista_par_der } = this.clasificarPatrones(lista_texto);
+    let lista_patrones  = this.clasificarPatronesV2(lista_texto);
 
-    // console.log("------------------------INICIO-----------------------");
-    // console.log(`Texto: ${texto}`);
-    // console.log(`Izquierda: `, lista_par_izq);
-    // console.log(`Izquierda Cont: `, lista_par_izq.length);
-    // console.log(`Derecha: `, lista_par_der);
-    // console.log(`Derecha Cont: `, lista_par_der.length);
+    let cont_balance = 0;
 
-    // this.tacharDatosExtra(lista_par_izq, lista_par_der);
-
-    lista_par_izq = lista_par_izq.filter(f => !f.borrar);
-    lista_par_der = lista_par_der.filter(f => !f.borrar);
-
-    let contMaximo = lista_par_izq.length >= lista_par_der.length ? lista_par_izq.length : lista_par_der.length;
-    // let listaMaximo = lista_par_izq.length >= lista_par_der.length ? lista_par_izq : lista_par_der;
-
-    // console.log("------------------LISTA LIMPIA---------------------------");
-    // console.log(`Texto: ${texto}`);
-    // console.log(`Izquierda: `, lista_par_izq);
-    // console.log(`Izquierda Cont: `, lista_par_izq.length);
-    // console.log(`Derecha: `, lista_par_der);
-    // console.log(`Derecha Cont: `, lista_par_der.length);
-    // console.log(`contMaximo: `, contMaximo);
-    // console.log(`listaMaximo: `, listaMaximo);
-
-    let par_izq = null;
-    let par_der = null;
-
-    for (let index = 0; index < contMaximo; index++) {
-      par_izq = lista_par_izq[index] ? lista_par_izq[index] : null;
-      par_der = lista_par_der[index] ? lista_par_der[index] : null;
-
-      if (par_izq){
-        if (par_izq.patron !== ":(" && !par_der) return false;
-        if (par_der && (par_der.posicion < par_izq.posicion)) return false;
+    for (let index = 0; index < lista_patrones.length; index++) {
+      switch (lista_patrones[index]) {
+        case "(": cont_balance++;
+          break;
+        case ")": cont_balance--;
+          break;
+        case ":)":
+          if (cont_balance > 0) cont_balance--;
+          break;
+        default:
+          break;
       }
-      else if (par_der){
-        if (par_der.patron !== ":)" && !par_izq) return false;
-        if (par_izq && (par_der.posicion < par_izq.posicion)) return false;
-      }
+      
+      if (cont_balance < 0) return false;
     }
-    return true;
-  }
-  //PERMITE CLASIFICAR LOS PATRONES '(' y ':(' A LA LISTA IZQUIERDA Y LOS PATRONES ')' y ':)' A LA DERECHA
-  clasificarPatrones(lista_texto){
-    let lista_par_izq = [];
-    let lista_par_der = [];
 
-    let cont_pos = 0;
+    if (cont_balance !== 0) return false;
+    else return true;
+  }
+
+  //PERMITE CLASIFICAR LOS PATRONES '(' y ':(' A LA LISTA IZQUIERDA Y LOS PATRONES ')' y ':)' A LA DERECHA
+  clasificarPatronesV2(lista_texto){
+    let lista_patrones = [];
+
     for (let index = 0; index < lista_texto.length; index++) {
-      if (lista_texto[index] === "("){
-        lista_par_izq.push({posicion: cont_pos, patron: lista_texto[index], borrar: false});
-        cont_pos++;
-      }
-      else if (lista_texto[index] === ")"){
-        lista_par_der.push({posicion: cont_pos, patron: lista_texto[index], borrar: false});
-        cont_pos++;
-      }
+      if (lista_texto[index] === "(" || lista_texto[index] === ")") lista_patrones.push(lista_texto[index]);
       else if (lista_texto[index] === ":"){
         if (lista_texto[index + 1]){
-          if (lista_texto[index + 1] === "("){
-            lista_par_izq.push({posicion: cont_pos, patron: `${lista_texto[index]}${lista_texto[index + 1]}`, borrar: false});
-            cont_pos++;
-            index++;
-          }
-          else if (lista_texto[index + 1] === ")"){
-            lista_par_der.push({posicion: cont_pos, patron: `${lista_texto[index]}${lista_texto[index + 1]}`, borrar: false});
-            cont_pos++;
+          if (lista_texto[index + 1] === "(" || lista_texto[index + 1] === ")"){
+            lista_patrones.push(`${lista_texto[index]}${lista_texto[index + 1]}`);
             index++;
           }
         }
       }
     }
 
-    return {lista_par_izq: lista_par_izq, lista_par_der: lista_par_der};
-  }
-
-  //PERMITE LIMPIAR AMBAS LISTAS, Y DEJAR LOS PATRONES ORDENADOS
-  tacharDatosExtra(lista_par_izq, lista_par_der){
-    let contMaximo = lista_par_izq.length >= lista_par_der.length ? lista_par_izq.length : lista_par_der.length;
-
-    let par_izq = null;
-    let par_der = null;
-
-    for (let index = 0; index < contMaximo; index++) {
-      par_izq = lista_par_izq[index] ? lista_par_izq[index] : null;
-      par_der = lista_par_der[index] ? lista_par_der[index] : null;
-      
-      if (par_izq){
-        if (par_izq.patron === ":("){
-          if (!par_der || (par_der.posicion < par_izq.posicion)) par_izq.borrar = true;
-        }
-        else if(par_izq.patron === "("){
-          if (par_der){
-            if (par_der.patron === ":)" && par_der.posicion < par_izq.posicion) par_der.borrar = true;
-          }
-        }
-      }else if (par_der){
-        if (par_der.patron === ":)"){
-          if (!par_izq || (par_izq.posicion > par_der.posicion)) par_der.borrar = true;
-        }
-        else if(par_der.patron === ")"){
-          if(par_izq){
-            if (par_izq.patron === ":(" && (par_izq.patron > par_der.posicion)) par_izq.borrar = true;
-          }
-        }
-      }
-    }
+    return lista_patrones;
   }
 
   generadorListado(){
@@ -212,6 +99,7 @@ class BalaDesbApp extends React.Component {
     let maximo = 30;
     let listaBalance = [
       //DATOS ORIGINALES
+      "---------------------DATOS ORIGINALES--------------------------------",
       "hola", //B
       "(hola)", //B
       "(()", //D
@@ -220,6 +108,42 @@ class BalaDesbApp extends React.Component {
       "hoy pm: fiesta :):)",//B
       ":((",//D
       "a (b (c (d) c) b) a :)",//B
+      "():)",
+      "():(",
+      //DATOS EXTRA
+      "---------------------DATOS EXTRA--------------------------------------",
+      ")",
+      "(",
+      "()AS(:)",
+      "(::))",
+      "(hoy pm: fiesta :):)",
+      "((hoy pm: fiesta :):)",
+      ":(():)",
+      ":()",
+      "(abc:)(abc)",
+      "(abc)(abc)",
+      "(abc:)",
+      ":)",
+      ":(",
+      ")(",
+      ":)()",
+      "():(",
+      "():(:)",
+      "():(:(",
+      "()()()()()()()",
+      "()()()())))((((",
+      ")(())(:()",
+      ":::))()()(::()",
+      ":)(())(:()",
+      ":)(())(:))",
+      ":)(())(:)))",
+      ":)(())(:):))",
+      "(::()",
+      "(:()",
+      "():)",
+      ":)(:):)",
+      "(:))",
+      "---------------------------DATOS ALEATORIOS---------------------------------"
     ];
     let texto = null;
     for (let index = 0; index < maximo; index++) {
