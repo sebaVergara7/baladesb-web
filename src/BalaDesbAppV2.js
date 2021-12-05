@@ -15,7 +15,7 @@ const style = {
   }
 }
 
-const letras          = "abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
+const letras          = "abcdefghijklmnñopqrstuvwxyz".split("");
 const lista_regla_2   = [":", " "].concat(letras);
 const listaCaracteres = ["(", ")"].concat(lista_regla_2);
 
