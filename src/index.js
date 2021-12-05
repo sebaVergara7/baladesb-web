@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import BalaDesbApp from './BalaDesbApp';
+import BalaDesbApp from './BalaDesbAppV2';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
